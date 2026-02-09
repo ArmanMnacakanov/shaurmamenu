@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="hy">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Shaurma Express - Համեղ Շաուրմա</title>
+    <meta name="description" content="Shaurma Express — արագ սննդի առաքում Երևանում։ Լավագույն շաուրման քաղաքում։" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        * {
+            scrollbar-width: none;
+            touch-action: manipulation;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: "#fff7ed",
+                            500: "#f97316", /* Яркий оранжевый */
+                            600: "#ea580c",
+                            700: "#c2410c",
+                            900: "#7c2d12"
+                        }
+                    },
+                    boxShadow: {
+                        neon: "0 10px 40px rgba(249, 115, 22, 0.35)"
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+
+<body class="text-slate-900 antialiased bg-orange-50/50">
+    <div x-data="shopApp" x-init="init()" class="min-h-screen">
+
+        <header class="sticky top-0 z-40 border-b border-orange-200 bg-white/90 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <button class="flex items-center gap-3" @click="navigate('catalog')">
+                        <div class="rounded-xl bg-gradient-to-r from-orange-500 to-red-600 p-2 text-white">
+                            <i class="fa-solid fa-fire-burner text-2xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xl font-bold tracking-tight text-brand-700">ShaurmaExpress</p>
+                            <p class="text-xs text-orange-600 font-medium">Լավագույն շաուրման Երևանում</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button
+                        class="relative rounded-full max-w-[40px] max-h-[40px] flex justify-center bg-orange-500 items-center border border-orange-500 p-2 text-white transition hover:bg-orange-600"
+                        @click="togglePanel('cart')">
+                        <i class="fa-solid fa-basket-shopping text-xl"></i>
+                        <span x-show="cart.length" x-text="cart.length" x-cloak
+                            class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"></span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section x-show="isRoute('catalog')" x-transition x-cloak class="mx-auto max-w-7xl px-4 py-10">
+                <div class="mb-10 space-y-4">
+                    <span
+                        class="inline-block px-4 py-1 rounded-full bg-orange-500 text-white text-xs font-bold tracking-widest uppercase">
+                        Մենյու
+                    </span>
+                    <h2 class="text-4xl font-bold text-brand-900">Ընտրեք ձեր շաուրման</h2>
+
+                    <div class="flex flex-wrap gap-4 mt-6">
+                        <input type="search" placeholder="Որոնում..." x-model="filters.search"
+                            class="flex-1 min-w-[200px] rounded-2xl border-orange-200 focus:ring-orange-500 focus:border-orange-500" />
+
+                        <select x-model="filters.category" class="rounded-2xl border-orange-200 text-brand-700">
+                            <option value="all">Բոլորը</option>
+                            <template x-for="cat in categories" :key="cat">
+                                <option :value="cat" x-text="cat"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <template x-for="product in filteredProducts" :key="product.id">
+                        <article
+                            class="group rounded-3xl border border-orange-100 bg-white p-4 shadow-sm transition hover:shadow-xl hover:-translate-y-1">
+                            <div class="relative h-52 overflow-hidden rounded-2xl">
+                                <img :src="product.image"
+                                    class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                                <span
+                                    class="absolute right-3 top-3 rounded-lg bg-white/90 px-2 py-1 text-xs font-bold text-brand-600"
+                                    x-text="product.category"></span>
+                            </div>
+
+                            <div class="mt-4 flex flex-col gap-2">
+                                <h3 class="text-xl font-bold text-brand-900" x-text="product.name"></h3>
+                                <p class="text-sm text-gray-500 line-clamp-2" x-text="product.description"></p>
+
+                                <div class="mt-4 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-orange-500 font-bold uppercase">Գին</p>
+                                        <p class="text-xl font-black text-brand-900"
+                                            x-text="formatCurrency(product.price)"></p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button @click="viewProduct(product)"
+                                            class="rounded-full max-w-[40px] max-h-[40px] flex justify-center items-center bg-orange-500 text-white p-3 text-brand-700 hover:bg-orange-200 transition">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button @click="addToCart(product)"
+                                            class="rounded-full max-w-[40px] max-h-[40px] flex justify-center items-center bg-orange-500 text-white p-3 hover:bg-brand-600 shadow-neon transition">
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </section>
+
+            <section x-show="isRoute('product')" x-transition x-cloak class="mx-auto max-w-4xl px-6 py-12">
+                <button @click="navigate('catalog')"
+                    class="mb-8 flex items-center gap-2 font-bold text-brand-600 hover:text-brand-700">
+                    <i class="fa-solid fa-arrow-left"></i> Վերադառնալ մենյու
+                </button>
+
+                <div
+                    class="grid gap-10 md:grid-cols-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-orange-100">
+                    <img :src="selectedProduct?.image" class="rounded-3xl h-80 w-full object-cover shadow-lg" />
+                    <div class="space-y-6">
+                        <h2 class="text-4xl font-black text-brand-900" x-text="selectedProduct?.name"></h2>
+                        <div class="flex gap-4">
+                            <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold"
+                                x-text="selectedProduct?.category"></span>
+                        </div>
+                        <p class="text-gray-600 text-lg leading-relaxed" x-text="selectedProduct?.description"></p>
+
+                        <div class="bg-orange-50 p-6 rounded-2xl">
+                            <p class="text-2xl font-black text-brand-900"
+                                x-text="formatCurrency(selectedProduct?.price)"></p>
+                            <button @click="addToCart(selectedProduct)"
+                                class="mt-4 w-full rounded-xl bg-orange-500 text-white py-4  font-bold shadow-neon hover:bg-brand-600">
+                                Ավելացնել զամբյուղում
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <aside x-show="panelName === 'cart'" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0" x-cloak
+            class="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b px-6 py-5">
+                <h3 class="text-xl font-bold text-brand-900">Զամբյուղ</h3>
+                <button @click="closePanel()" class="text-gray-400 hover:text-brand-600"><i
+                        class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                <template x-if="cart.length === 0">
+                    <div class="text-center py-20 text-gray-400">
+                        <i class="fa-solid fa- plate-wheat text-5xl mb-4 opacity-20"></i>
+                        <p>Զամբյուղը դատարկ է</p>
+                    </div>
+                </template>
+                <template x-for="item in cart" :key="item.id">
+                    <div class="flex gap-4 bg-orange-50 p-3 rounded-2xl border border-orange-100">
+                        <img :src="item.image" class="h-16 w-16 rounded-lg object-cover" />
+                        <div class="flex-1">
+                            <p class="font-bold text-brand-900" x-text="item.name"></p>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="flex items-center gap-3 bg-white rounded-lg border px-2">
+                                    <button @click="decrementQty(item.id)" class="text-brand-600 max-sm:text-2xl font-bold">-</button>
+                                    <span x-text="item.qty" class="text-sm font-bold"></span>
+                                    <button @click="incrementQty(item.id)" class="text-brand-600 max-sm:text-2xl font-bold">+</button>
+                                </div>
+                                <p class="font-bold text-brand-700" x-text="formatCurrency(item.price * item.qty)"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="border-t p-6 bg-gray-50">
+                <div class="flex justify-between mb-4">
+                    <span class="text-gray-600 font-medium">Ընդհանուր գումար</span>
+                    <span class="text-2xl font-black text-brand-900" x-text="formatCurrency(cartTotal)"></span>
+                </div>
+                <button @click="openOrderForm()" :disabled="!cart.length"
+                    class="w-full rounded-xl bg-orange-500 py-4 text-white font-bold shadow-neon disabled:opacity-50">
+                    Ձևակերպել պատվերը
+                </button>
+            </div>
+        </aside>
+
+        <div x-show="panelName === 'order'" x-transition x-cloak
+            class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-brand-900/60 backdrop-blur-sm" @click="closePanel()"></div>
+            <div class="relative w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl">
+                <h3 class="text-2xl font-black text-brand-900 mb-6">Պատվերի տվյալներ</h3>
+                <div class="space-y-4">
+                    <input type="text" placeholder="Անուն" x-model="orderForm.customerInfo.name"
+                        class="w-full rounded-xl border-orange-200 focus:ring-brand-500" />
+                    <input type="tel" placeholder="Հեռախոս" x-model="orderForm.customerInfo.phone"
+                        class="w-full rounded-xl border-orange-200 focus:ring-brand-500" />
+                    <input type="text" placeholder="Հասցե" x-model="orderForm.customerInfo.address"
+                        class="w-full rounded-xl border-orange-200 focus:ring-brand-500" />
+                    <textarea placeholder="Նշումներ" x-model="orderForm.notes"
+                        class="w-full rounded-xl border-orange-200 focus:ring-brand-500"></textarea>
+
+                    <div class="pt-4 flex gap-3">
+                        <button @click="submitOrder()"
+                            class="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition">Հաստատել</button>
+                        <button @click="closePanel()"
+                            class="px-6 py-3 border border-gray-200 rounded-xl font-bold text-gray-500 hover:bg-gray-50">Փակել</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('shopApp', () => ({
+                currentRoute: 'catalog',
+                panelName: null,
+                cart: [],
+                filters: { search: '', category: 'all' },
+                selectedProduct: null,
+                categories: ['Տավարի', 'Հավի', 'Խոզի', 'Ըմպելիքներ'],
+
+                products: [
+                    {
+                        id: 101,
+                        name: "Կլասիկ Շաուրմա",
+                        category: "Շաուրմա",
+                        price: 1200,
+                        image: "./classic.jpg",
+                        badge: "Հավի մսով",
+                        specs: ["Թարմ լավաշ", "Ֆիրմային սոուս", "Կարտոֆիլ ֆրի", "Թարմ վարունգ"],
+                        description: "Դասական հավի շաուրմա՝ պատրաստված թարմ բաղադրիչներով և մեր ֆիրմային սոուսով, փաթաթված նրբաթերթ լավաշի մեջ:",
+                        highlights: [
+                            { label: "Քաշ", value: "350գ" },
+                            { label: "Կծվություն", value: "Միջին" }
+                        ]
+                    },
+                    {
+                        id: 102,
+                        name: "Տավարի Շաուրմա",
+                        category: "Շաուրմա",
+                        price: 1500,
+                        image: "./tavar.jpg",
+                        badge: "Տավարի մսով",
+                        specs: ["Տավարի փափկամիս", "Մարինացված սոխ", "Կանաչի", "Հատուկ սոուս"],
+                        description: "Հյութալի տավարի մսով շաուրմա, որն առանձնանում է իր հարուստ համով և թարմ բանջարեղենային հավելումներով:",
+                        highlights: [
+                            { label: "Քաշ", value: "400գ" },
+                            { label: "Միս", value: "Տավարի" }
+                        ]
+                    },
+                    {
+                        id: 103,
+                        name: "Շաուրմա Պանրով",
+                        category: "Շաուրմա",
+                        price: 1400,
+                        image: "./panrov.jpg",
+                        badge: "Հալված պանրով",
+                        specs: ["Հավի միս", "Մոցարելլա պանիր", "Սպիտակ սոուս", "Տապակած լավաշ"],
+                        description: "Շաուրմայի և հալված պանրի կատարյալ համադրություն, որը հալվում է բերանում:",
+                        highlights: [
+                            { label: "Քաշ", value: "380գ" },
+                            { label: "Պանիր", value: "Մոցարելլա" }
+                        ]
+                    },
+                    {
+                        id: 104,
+                        name: "Շաուրմա Հավով Դասական",
+                        category: "Շաուրմա",
+                        price: 1300,
+                        image: "./hav-dasakan.jpg",
+                        badge: "Դասական",
+                        specs: ["Հավի միս", "Թարմ բանջարեղեն", "Սպիտակ սոուս", "Լավաշ"],
+                        description: "Դասական հավով շաուրմա՝ թարմ և հագեցնող համով:",
+                        highlights: [
+                            { label: "Քաշ", value: "360գ" },
+                            { label: "Միս", value: "Հավ" }
+                        ]
+                    },
+                    {
+                        id: 105,
+                        name: "Շաուրմա Հավով Կծու",
+                        category: "Շաուրմա",
+                        price: 1350,
+                        image: "./hav-kcu.jpg",
+                        badge: "Կծու",
+                        specs: ["Հավի միս", "Կծու սոուս", "Կարմիր պղպեղ", "Լավաշ"],
+                        description: "Կծու համերի սիրահարների համար պատրաստված հավով շաուրմա:",
+                        highlights: [
+                            { label: "Քաշ", value: "370գ" },
+                            { label: "Կծուություն", value: "Միջին" }
+                        ]
+                    },
+                    {
+                        id: 106,
+                        name: "Շաուրմա Հավով և Սնկով",
+                        category: "Շաուրմա",
+                        price: 1450,
+                        image: "./hav-sunk.jpg",
+                        badge: "Սնկով",
+                        specs: ["Հավի միս", "Տապակած սունկ", "Սպիտակ սոուս", "Լավաշ"],
+                        description: "Հավի և սնկի նուրբ համադրություն՝ հագեցնող և անուշաբույր:",
+                        highlights: [
+                            { label: "Քաշ", value: "390գ" },
+                            { label: "Լցոնում", value: "Սունկ + Հավ" }
+                        ]
+                    },
+                    {
+                        id: 107,
+                        name: "Շաուրմա Հավով և Պանրով",
+                        category: "Շաուրմա",
+                        price: 1500,
+                        image: "./hav-panir.jpg",
+                        badge: "Պանրով",
+                        specs: ["Հավի միս", "Հալված պանիր", "Սպիտակ սոուս", "Տապակած լավաշ"],
+                        description: "Հավով շաուրմա հալված պանրով՝ առավել հագեցնող համի համար:",
+                        highlights: [
+                            { label: "Քաշ", value: "400գ" },
+                            { label: "Պանիր", value: "Չեդդեր" }
+                        ]
+                    }
+
+                ],
+                categories: ["Բուրգերներ", "Շաուրմա", "Ըմպելիքներ"],
+
+                orderForm: { customerInfo: { name: '', phone: '', address: '' }, notes: '' },
+
+                init() {
+                    const savedCart = localStorage.getItem('shaurma_cart');
+                    if (savedCart) this.cart = JSON.parse(savedCart);
+                },
+
+                get filteredProducts() {
+                    return this.products.filter(p => {
+                        const matchSearch = p.name.toLowerCase().includes(this.filters.search.toLowerCase());
+                        const matchCat = this.filters.category === 'all' || p.category === this.filters.category;
+                        return matchSearch && matchCat;
+                    });
+                },
+
+                get cartTotal() {
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                },
+
+                navigate(route) { this.currentRoute = route; window.scrollTo(0, 0); },
+                isRoute(route) { return this.currentRoute === route; },
+
+                togglePanel(name) { this.panelName = this.panelName === name ? null : name; },
+                closePanel() { this.panelName = null; },
+
+                viewProduct(product) {
+                    this.selectedProduct = product;
+                    this.navigate('product');
+                },
+
+                addToCart(product) {
+                    const existing = this.cart.find(item => item.id === product.id);
+                    if (existing) {
+                        existing.qty++;
+                    } else {
+                        this.cart.push({ ...product, qty: 1 });
+                    }
+                    this.saveCart();
+                    alert('Ավելացված է զամբյուղ:');
+                },
+
+                incrementQty(id) {
+                    this.cart.find(i => i.id === id).qty++;
+                    this.saveCart();
+                },
+
+                decrementQty(id) {
+                    const item = this.cart.find(i => i.id === id);
+                    if (item.qty > 1) item.qty--;
+                    else this.cart = this.cart.filter(i => i.id !== id);
+                    this.saveCart();
+                },
+
+                saveCart() { localStorage.setItem('shaurma_cart', JSON.stringify(this.cart)); },
+
+                formatCurrency(val) { return val + ' ֏'; },
+
+                openOrderForm() { this.panelName = 'order'; },
+
+                submitOrder() {
+                    if (!this.orderForm.customerInfo.phone) return alert('Խնդրում ենք լրացնել հեռախոսահամարը');
+                    alert('Շնորհակալություն: Ձեր պատվերը ընդունված է:');
+                    this.cart = [];
+                    this.saveCart();
+                    this.closePanel();
+                    this.navigate('catalog');
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>
