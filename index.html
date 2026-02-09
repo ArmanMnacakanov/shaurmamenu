@@ -149,14 +149,14 @@
                 </div>
             </section>
 
-            <section x-show="isRoute('product')" x-transition x-cloak class="mx-auto max-w-4xl px-6 py-12">
+            <section x-show="isRoute('product')" x-transition x-cloak class="mx-auto max-w-4xl px-3 py-12">
                 <button @click="navigate('catalog')"
                     class="mb-8 flex items-center gap-2 font-bold text-brand-600 hover:text-brand-700">
                     <i class="fa-solid fa-arrow-left"></i> Վերադառնալ մենյու
                 </button>
 
                 <div
-                    class="grid gap-10 md:grid-cols-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-orange-100">
+                    class="grid gap-10 md:grid-cols-2 bg-white p-3 rounded-[2.5rem] shadow-sm border border-orange-100">
                     <img :src="selectedProduct?.image" class="rounded-3xl h-80 w-full object-cover shadow-lg" />
                     <div class="space-y-6">
                         <h2 class="text-4xl font-black text-brand-900" x-text="selectedProduct?.name"></h2>
